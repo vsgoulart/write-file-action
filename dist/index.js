@@ -3289,7 +3289,7 @@ function main() {
             }
             if (mode === "prepend") {
                 const file = yield readFile(path);
-                yield writeFile(path, `${file.toString()}\n${contents}`);
+                yield writeFile(path, `${contents}\n${file.toString()}`);
             }
             const statResult = yield stat(path);
             (0, core_1.setOutput)("size", `${statResult.size}`);
