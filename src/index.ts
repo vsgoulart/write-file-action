@@ -29,8 +29,8 @@ async function main() {
     const mode = (getInput("write-mode") || "append").toLocaleLowerCase();
 
     // Ensure the correct mode is specified
-    if (["append", "overwrite", "preserve", "prepend"].includes(mode)) {
-      setFailed("Mode must be one of: overwrite, append, or preserve");
+    if (!["append", "overwrite", "preserve", "prepend"].includes(mode)) {
+      setFailed("Mode must be one of: overwrite, append, preserve or prepend");
       return;
     }
 
