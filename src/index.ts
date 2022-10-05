@@ -1,7 +1,7 @@
 import { getInput, setFailed, setOutput } from "@actions/core";
 import { mkdirP } from "@actions/io";
 import { appendFile, exists, writeFile, stat } from "fs";
-import { dirname, join as joinPath, resolve as resolvePath } from "path";
+import { dirname } from "path";
 import { promisify } from "util";
 
 const appendFileAsync = promisify(appendFile);
