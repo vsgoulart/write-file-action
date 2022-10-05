@@ -22,7 +22,7 @@
     "@actions/io": "1.1.2"
   },
   "devDependencies": {
-    "@types/node": "13.13.52",
+    "@types/node": "16.11.64",
     "@vercel/ncc": "0.34.0"
   }
 }

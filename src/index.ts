@@ -1,15 +1,24 @@
 import { getInput, setFailed, setOutput } from "@actions/core";
 import { mkdirP } from "@actions/io";
-import { appendFile, exists, writeFile, stat } from "fs";
+import { appendFile, writeFile, stat, readFile } from "fs/promises";
 import { dirname } from "path";
-import { promisify } from "util";
-
-const appendFileAsync = promisify(appendFile);
-const existsAsync = promisify(exists);
-const writeFileAsync = promisify(writeFile);
-const statAsync = promisify(stat);
 
 main().catch((error) => setFailed(error.message));
+
+function isFileSystemError(error: unknown): error is { code: string } {
+  return (
+    typeof error === "object" && error !== null && error.hasOwnProperty("code")
+  );
+}
+
+function isGenericError(error: unknown): error is Error {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    error.hasOwnProperty("code") &&
+    typeof (error as { message: unknown }).message === "string"
+  );
+}
 
 async function main() {
   try {
@@ -18,31 +27,58 @@ async function main() {
     const mode = (getInput("write-mode") || "append").toLocaleLowerCase();
 
     // Ensure the correct mode is specified
-    if (mode !== "append" && mode !== "overwrite" && mode !== "preserve") {
+    if (["append", "overwrite", "preserve", "prepend"].includes(mode)) {
       setFailed("Mode must be one of: overwrite, append, or preserve");
       return;
     }
 
     // Preserve the file
-    if (mode === "preserve" && (await existsAsync(path))) {
-      const statResult = await statAsync(path);
-      setOutput("size", `${statResult.size}`);
-      return;
+    if (mode === "preserve") {
+      try {
+        const statResult = await stat(path);
+        setOutput("size", `${statResult.size}`);
+        return;
+      } catch (error) {
+        const doesFileExist = !(
+          isFileSystemError(error) && error.code === "ENOENT"
+        );
+
+        if (doesFileExist) {
+          return;
+        }
+
+        if (isGenericError(error)) {
+          return setFailed(error);
+        }
+
+        return setFailed("Failed to check if file exists in preserve mode");
+      }
     }
 
     const targetDir = dirname(path);
 
     await mkdirP(targetDir);
 
-    if (mode === "overwrite") {
-      await writeFileAsync(path, contents);
-    } else {
-      await appendFileAsync(path, contents);
+    if (["overwrite", "preserve"].includes(mode)) {
+      await writeFile(path, contents);
     }
 
-    const statResult = await statAsync(path);
+    if (mode === "append") {
+      await appendFile(path, contents);
+    }
+
+    if (mode === "prepend") {
+      const file = await readFile(path);
+      await writeFile(path, `${file.toString()}\n${contents}`);
+    }
+
+    const statResult = await stat(path);
     setOutput("size", `${statResult.size}`);
   } catch (error) {
-    setFailed(error.message);
+    if (isGenericError(error)) {
+      return setFailed(error);
+    }
+
+    return setFailed("Failed to write to file");
   }
 }
