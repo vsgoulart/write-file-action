@@ -3237,8 +3237,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __nccwpck_require__(186);
 const io_1 = __nccwpck_require__(436);
-const promises_1 = __nccwpck_require__(292);
+const fs_1 = __nccwpck_require__(147);
 const path_1 = __nccwpck_require__(17);
+const { appendFile, writeFile, stat, readFile } = fs_1.promises;
 main().catch((error) => (0, core_1.setFailed)(error.message));
 function isFileSystemError(error) {
     return (typeof error === "object" && error !== null && error.hasOwnProperty("code"));
@@ -3263,7 +3264,7 @@ function main() {
             // Preserve the file
             if (mode === "preserve") {
                 try {
-                    const statResult = yield (0, promises_1.stat)(path);
+                    const statResult = yield stat(path);
                     (0, core_1.setOutput)("size", `${statResult.size}`);
                     return;
                 }
@@ -3281,16 +3282,16 @@ function main() {
             const targetDir = (0, path_1.dirname)(path);
             yield (0, io_1.mkdirP)(targetDir);
             if (["overwrite", "preserve"].includes(mode)) {
-                yield (0, promises_1.writeFile)(path, contents);
+                yield writeFile(path, contents);
             }
             if (mode === "append") {
-                yield (0, promises_1.appendFile)(path, contents);
+                yield appendFile(path, contents);
             }
             if (mode === "prepend") {
-                const file = yield (0, promises_1.readFile)(path);
-                yield (0, promises_1.writeFile)(path, `${file.toString()}\n${contents}`);
+                const file = yield readFile(path);
+                yield writeFile(path, `${file.toString()}\n${contents}`);
             }
-            const statResult = yield (0, promises_1.stat)(path);
+            const statResult = yield stat(path);
             (0, core_1.setOutput)("size", `${statResult.size}`);
         }
         catch (error) {
@@ -3342,14 +3343,6 @@ module.exports = require("events");
 
 "use strict";
 module.exports = require("fs");
-
-/***/ }),
-
-/***/ 292:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("fs/promises");
 
 /***/ }),
 
