@@ -71,7 +71,7 @@ async function main() {
 
     if (mode === "prepend") {
       const file = await readFile(path);
-      await writeFile(path, `${file.toString()}\n${contents}`);
+      await writeFile(path, `${contents}\n${file.toString()}`);
     }
 
     const statResult = await stat(path);
