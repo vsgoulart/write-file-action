@@ -3257,8 +3257,8 @@ function main() {
             const contents = (0, core_1.getInput)("contents", { required: true });
             const mode = ((0, core_1.getInput)("write-mode") || "append").toLocaleLowerCase();
             // Ensure the correct mode is specified
-            if (["append", "overwrite", "preserve", "prepend"].includes(mode)) {
-                (0, core_1.setFailed)("Mode must be one of: overwrite, append, or preserve");
+            if (!["append", "overwrite", "preserve", "prepend"].includes(mode)) {
+                (0, core_1.setFailed)("Mode must be one of: overwrite, append, preserve or prepend");
                 return;
             }
             // Preserve the file
