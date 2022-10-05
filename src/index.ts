@@ -1,7 +1,9 @@
 import { getInput, setFailed, setOutput } from "@actions/core";
 import { mkdirP } from "@actions/io";
-import { appendFile, writeFile, stat, readFile } from "fs/promises";
+import { promises } from "fs";
 import { dirname } from "path";
+
+const { appendFile, writeFile, stat, readFile } = promises;
 
 main().catch((error) => setFailed(error.message));
 
